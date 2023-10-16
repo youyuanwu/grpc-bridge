@@ -7,7 +7,6 @@ file(MAKE_DIRECTORY ${PROTO_SRC_DIR})
 include_directories(${PROTO_SRC_DIR})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTOS})
-#grpc_generate_cpp(GRPC_SRCS GRPC_HDRS ${PROTO_SRC_DIR} ${PROTOS})
 get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
 protobuf_generate(LANGUAGE grpc
     PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}"
