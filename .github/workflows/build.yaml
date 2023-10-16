@@ -1,0 +1,47 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60 # vcpkg might take time from cold cache
+    strategy:
+      matrix:
+        BUILD_TYPE: ["Debug", "Release"]
+        os: [ windows-latest ]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Get specific version CMake
+      uses: lukka/get-cmake@v3.25.1
+
+    - name: Setup vcpkg (it does not install any package yet)
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 486a4640db740f5994e492eb60748111dfc48de7
+
+    - name: Run CMake consuming CMakePreset.json and run vcpkg to build dependencies
+      uses: lukka/run-cmake@v10
+      with:
+        # This is the name of the CMakePresets.json's configuration to use to generate
+        # the project files. This configuration leverages the vcpkg.cmake toolchain file to
+        # run vcpkg and install all dependencies specified in vcpkg.json.
+        configurePreset: 'default'
+        # This is the name of the CMakePresets.json's configuration to build the project.
+        buildPreset: 'build'
+        buildPresetAdditionalArgs: "['.', '--config', '${{ matrix.BUILD_TYPE }}']"
+        testPreset: 'test'
+        testPresetAdditionalArgs: "['.', '--config', '${{ matrix.BUILD_TYPE }}']"
+
+    # - name: run cmake
+    #   run: > 
+    #     cmake . -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -B build
+    # - name: run build
+    #   run: cmake --build build --config ${{ matrix.BUILD_TYPE }}
+    
+    # - name: run test
+    #   run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
