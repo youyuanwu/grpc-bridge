@@ -7,9 +7,9 @@ file(MAKE_DIRECTORY ${PROTO_SRC_DIR})
 include_directories(${PROTO_SRC_DIR})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTOS})
-get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
+# get_target_property(grpc_cpp_plugin_location $<TARGET_FILE:grpc_cpp_plugin> LOCATION)
 protobuf_generate(LANGUAGE grpc
-    PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}"
+    PLUGIN "protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>"
     OUT_VAR GRPC_SRCS
     APPEND_PATH
     GENERATE_EXTENSIONS
@@ -25,7 +25,7 @@ add_executable(greeter_server
     ${GRPC_SRCS}
 )
 target_link_libraries(greeter_server
-    gRPC::grpc++_reflection
+    grpc++_reflection
     protobuf::libprotobuf
 )
 
@@ -36,6 +36,6 @@ add_executable(greeter_client
     ${GRPC_SRCS}
 )
 target_link_libraries(greeter_client
-    gRPC::grpc++_reflection
+    grpc++_reflection
     protobuf::libprotobuf
 )

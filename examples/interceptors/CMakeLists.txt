@@ -27,9 +27,9 @@ get_filename_component(PROTOS "./keyvaluestore.proto" ABSOLUTE)
 
 # Generated sources
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTOS})
-get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
+# get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
 protobuf_generate(LANGUAGE grpc
-    PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}"
+    PLUGIN "protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>"
     OUT_VAR GRPC_SRCS
     APPEND_PATH
     GENERATE_EXTENSIONS
@@ -49,7 +49,7 @@ add_library(kvs_grpc_proto
 )
 target_link_libraries(kvs_grpc_proto
   PUBLIC
-  gRPC::grpc++_reflection
+  grpc++_reflection
   protobuf::libprotobuf
 )
 
@@ -57,12 +57,12 @@ target_link_libraries(kvs_grpc_proto
 add_executable(client "client.cc" "caching_interceptor.h")
 target_link_libraries(client
   kvs_grpc_proto
-  gRPC::grpc++_reflection
+  grpc++_reflection
   protobuf::libprotobuf)
 
 # server
 add_executable(server "server.cc")
 target_link_libraries(server
   kvs_grpc_proto
-  gRPC::grpc++_reflection
+  grpc++_reflection
   protobuf::libprotobuf)

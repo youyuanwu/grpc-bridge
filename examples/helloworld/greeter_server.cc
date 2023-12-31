@@ -55,6 +55,8 @@ using helloworld::Greeter;
 class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
+    std::cout << "SayHello: " << request->name() << std::endl;
+
     std::string prefix("Hello ");
     reply->set_message(prefix + request->name());
     return Status::OK;
@@ -62,7 +64,9 @@ class GreeterServiceImpl final : public Greeter::Service {
 };
 
 void RunServer() {
-  std::string server_address("0.0.0.0:50051");
+  std::string server_address("unix:C:\\Users\\user1\\AppData\\Local\\Temp\\my.sock");
+  //std::string server_address("0.0.0.0:50051");
+  // std::string server_address("unix:D:/code/cpp/grpc-bridge/my.sock");
   GreeterServiceImpl service;
 
   ServerBuilder builder;

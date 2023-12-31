@@ -9,8 +9,20 @@ project(grpc-bridge VERSION 0.0.1 LANGUAGES CXX)
 
 message(STATUS "vcpkg installed dir: ${VCPKG_INSTALLED_DIR}")
 
-find_package(Protobuf REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
+set(USE_LOCAL_GRPC ON)
+if(USE_LOCAL_GRPC)
+  set(gRPC_INSTALL_default OFF)
+  set(protobuf_INSTALL OFF)
+  set(ABSL_ENABLE_INSTALL OFF)
+  set(utf8_range_ENABLE_INSTALL OFF)
+  add_subdirectory(../grpc ../grpc/cmake/build EXCLUDE_FROM_ALL)
+  #find_package(Protobuf REQUIRED)
+  include(FindProtobuf)
+else()
+  # use vcpkg
+  find_package(Protobuf REQUIRED)
+  find_package(gRPC CONFIG REQUIRED)
+endif()
 
 # Cmake find modules
 #list(APPEND CMAKE_MODULE_PATH "${VCPKG_INSTALLED_DIR}/share/grpc")
