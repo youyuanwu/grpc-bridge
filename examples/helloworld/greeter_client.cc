@@ -92,7 +92,10 @@ int main(int argc, char** argv) {
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
   GreeterClient greeter(grpc::CreateChannel(
-      "localhost:50051", grpc::InsecureChannelCredentials()));
+      //"unix:D:/code/cpp/grpc-bridge/my.sock", 
+      //"localhost:50051",
+      "unix:C:\\Users\\user1\\AppData\\Local\\Temp/my.sock",
+      grpc::InsecureChannelCredentials()));
   std::string user("world");
   std::string reply = greeter.SayHello(user);
   std::cout << "Greeter received: " << reply << std::endl;

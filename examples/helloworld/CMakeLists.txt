@@ -7,8 +7,6 @@ file(MAKE_DIRECTORY ${PROTO_SRC_DIR})
 include_directories(${PROTO_SRC_DIR})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTOS})
-#grpc_generate_cpp(GRPC_SRCS GRPC_HDRS ${PROTO_SRC_DIR} ${PROTOS})
-get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
 protobuf_generate(LANGUAGE grpc
     PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}"
     OUT_VAR GRPC_SRCS
@@ -26,7 +24,8 @@ add_executable(greeter_server
     ${GRPC_SRCS}
 )
 target_link_libraries(greeter_server
-    gRPC::grpc++_reflection
+    gRPC::grpc
+    gRPC::grpc++
     protobuf::libprotobuf
 )
 
@@ -37,6 +36,7 @@ add_executable(greeter_client
     ${GRPC_SRCS}
 )
 target_link_libraries(greeter_client
-    gRPC::grpc++_reflection
+    gRPC::grpc
+    gRPC::grpc++
     protobuf::libprotobuf
 )

@@ -33,9 +33,9 @@ jobs:
         configurePreset: 'default'
         # This is the name of the CMakePresets.json's configuration to build the project.
         buildPreset: 'build'
-        buildPresetAdditionalArgs: "['.', '--config', '${{ matrix.BUILD_TYPE }}']"
+        buildPresetAdditionalArgs: "['--config', '${{ matrix.BUILD_TYPE }}']"
         testPreset: 'test'
-        testPresetAdditionalArgs: "['.', '--config', '${{ matrix.BUILD_TYPE }}']"
+        testPresetAdditionalArgs: "['--config', '${{ matrix.BUILD_TYPE }}']"
 
     # - name: run cmake
     #   run: > 
