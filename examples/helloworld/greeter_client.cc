@@ -31,7 +31,6 @@
  *
  */
 
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -42,6 +41,10 @@
 #else
 #include "helloworld.grpc.pb.h"
 #endif
+
+#include <filesystem>
+#include <absl/strings/str_cat.h>
+#include <absl/log/log.h>
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -76,8 +79,7 @@ class GreeterClient {
     if (status.ok()) {
       return reply.message();
     } else {
-      std::cout << status.error_code() << ": " << status.error_message()
-                << std::endl;
+      LOG(INFO) << status.error_code() << ": " << status.error_message();
       return "RPC failed";
     }
   }
@@ -91,14 +93,22 @@ int main(int argc, char** argv) {
   // are created. This channel models a connection to an endpoint (in this case,
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
+  std::error_code ec;
+  auto temp = std::filesystem::temp_directory_path(ec);
+  if(ec)
+  {
+    LOG(ERROR) <<  "Fail to get temp dir";
+    return 1;
+  }
+  auto file_path = absl::StrCat(temp.string(), "/my.sock");
+  LOG(INFO) << "Using sock file: " << file_path;
+
   GreeterClient greeter(grpc::CreateChannel(
-      //"unix:D:/code/cpp/grpc-bridge/my.sock", 
-      //"localhost:50051",
-      "unix:C:\\Users\\user1\\AppData\\Local\\Temp/my.sock",
+      absl::StrCat("unix:", file_path),
       grpc::InsecureChannelCredentials()));
   std::string user("world");
   std::string reply = greeter.SayHello(user);
-  std::cout << "Greeter received: " << reply << std::endl;
+  LOG(INFO) << "Greeter received: " << reply << std::endl;
 
   return 0;
 }

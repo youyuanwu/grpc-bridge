@@ -24,8 +24,7 @@ add_executable(greeter_server
     ${GRPC_SRCS}
 )
 target_link_libraries(greeter_server
-    gRPC::grpc
-    gRPC::grpc++
+    gRPC::grpc++_reflection
     protobuf::libprotobuf
 )
 
@@ -36,7 +35,6 @@ add_executable(greeter_client
     ${GRPC_SRCS}
 )
 target_link_libraries(greeter_client
-    gRPC::grpc
-    gRPC::grpc++
+    gRPC::grpc++_reflection
     protobuf::libprotobuf
 )

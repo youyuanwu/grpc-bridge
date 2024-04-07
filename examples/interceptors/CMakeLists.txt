@@ -48,8 +48,7 @@ add_library(kvs_grpc_proto
 )
 target_link_libraries(kvs_grpc_proto
   PUBLIC
-  gRPC::grpc
-  gRPC::grpc++
+  gRPC::grpc++_reflection
   protobuf::libprotobuf
 )
 
@@ -57,14 +56,12 @@ target_link_libraries(kvs_grpc_proto
 add_executable(client "client.cc" "caching_interceptor.h")
 target_link_libraries(client
   kvs_grpc_proto
-  gRPC::grpc
-  gRPC::grpc++
+  gRPC::grpc++_reflection
   protobuf::libprotobuf)
 
 # server
 add_executable(server "server.cc")
 target_link_libraries(server
   kvs_grpc_proto
-  gRPC::grpc
-  gRPC::grpc++
+  gRPC::grpc++_reflection
   protobuf::libprotobuf)

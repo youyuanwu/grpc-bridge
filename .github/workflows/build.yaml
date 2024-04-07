@@ -24,18 +24,20 @@ jobs:
       with:
         vcpkgGitCommitId: 486a4640db740f5994e492eb60748111dfc48de7
 
-    - name: Run CMake consuming CMakePreset.json and run vcpkg to build dependencies
-      uses: lukka/run-cmake@v10
-      with:
-        # This is the name of the CMakePresets.json's configuration to use to generate
-        # the project files. This configuration leverages the vcpkg.cmake toolchain file to
-        # run vcpkg and install all dependencies specified in vcpkg.json.
-        configurePreset: 'default'
-        # This is the name of the CMakePresets.json's configuration to build the project.
-        buildPreset: 'build'
-        buildPresetAdditionalArgs: "['--config', '${{ matrix.BUILD_TYPE }}']"
-        testPreset: 'test'
-        testPresetAdditionalArgs: "['--config', '${{ matrix.BUILD_TYPE }}']"
+    # TODO: wait for grpc vcpkg new version release 1.63+ to enable ci.
+
+    # - name: Run CMake consuming CMakePreset.json and run vcpkg to build dependencies
+    #   uses: lukka/run-cmake@v10
+    #   with:
+    #     # This is the name of the CMakePresets.json's configuration to use to generate
+    #     # the project files. This configuration leverages the vcpkg.cmake toolchain file to
+    #     # run vcpkg and install all dependencies specified in vcpkg.json.
+    #     configurePreset: 'default'
+    #     # This is the name of the CMakePresets.json's configuration to build the project.
+    #     buildPreset: 'build'
+    #     buildPresetAdditionalArgs: "['--config', '${{ matrix.BUILD_TYPE }}']"
+    #     testPreset: 'test'
+    #     testPresetAdditionalArgs: "['--config', '${{ matrix.BUILD_TYPE }}']"
 
     # - name: run cmake
     #   run: > 

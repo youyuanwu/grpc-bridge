@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -42,6 +40,7 @@
 #else
 #include "helloworld.grpc.pb.h"
 #endif
+#include <absl/log/log.h>
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -55,7 +54,7 @@ using helloworld::Greeter;
 class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
-    std::cout << "SayHello: " << request->name() << std::endl;
+    LOG(INFO) << "SayHello: " << request->name();
 
     std::string prefix("Hello ");
     reply->set_message(prefix + request->name());
@@ -63,8 +62,17 @@ class GreeterServiceImpl final : public Greeter::Service {
   }
 };
 
-void RunServer() {
-  std::string server_address("unix:C:\\Users\\user1\\AppData\\Local\\Temp\\my.sock");
+int RunServer() {
+  std::error_code ec;
+  auto temp = std::filesystem::temp_directory_path(ec);
+  if(ec)
+  {
+    return 1;
+  }
+  auto file_path = absl::StrCat(temp.string(), "/my.sock");
+  LOG(INFO) << "Using sock file: " << file_path;
+
+  std::string server_address= absl::StrCat("unix:", file_path);
   //std::string server_address("0.0.0.0:50051");
   // std::string server_address("unix:D:/code/cpp/grpc-bridge/my.sock");
   GreeterServiceImpl service;
@@ -77,15 +85,14 @@ void RunServer() {
   builder.RegisterService(&service);
   // Finally assemble the server.
   std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+  LOG(INFO) <<  "Server listening on " << server_address;
 
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
   server->Wait();
+  return 0;
 }
 
 int main(int argc, char** argv) {
-  RunServer();
-
-  return 0;
+  return RunServer();
 }
