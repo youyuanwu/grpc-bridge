@@ -15,7 +15,6 @@ mod tests {
     };
     // use rustls::server::ResolvesServerCert;
     use rustls_cng::{
-        cert::CertContext,
         signer::CngSigningKey,
         store::{CertStore, CertStoreType},
     };
@@ -48,39 +47,17 @@ mod tests {
         hash_array
     }
 
+    // always return the same key.
+    // It is possible to return different key based on client.
     #[derive(Debug)]
     pub struct ServerCertResolver {
-        inner: Vec<CertContext>,
+        key: Arc<CertifiedKey>,
     }
 
     impl ResolvesServerCert for ServerCertResolver {
         fn resolve(&self, client_hello: ClientHello) -> Option<Arc<CertifiedKey>> {
             println!("Client hello server name: {:?}", client_hello.server_name());
-            //let name = client_hello.server_name()?;
-
-            // look up certificate by subject
-            // let contexts = self.0.find_by_subject_str(name).ok()?;
-            let contexts = &self.inner;
-
-            // attempt to acquire a private key and construct CngSigningKey
-            let (context, key) = contexts.into_iter().find_map(|ctx| {
-                let key = ctx.acquire_key().ok()?;
-                CngSigningKey::new(key).ok().map(|key| (ctx, key))
-            })?;
-
-            println!("Key alg group: {:?}", key.key().algorithm_group());
-            println!("Key alg: {:?}", key.key().algorithm());
-
-            // attempt to acquire a full certificate chain
-            let chain = context.as_chain_der().ok()?;
-            let certs = chain.into_iter().map(Into::into).collect();
-
-            // return CertifiedKey instance
-            Some(Arc::new(CertifiedKey {
-                cert: certs,
-                key: Arc::new(key),
-                ocsp: None,
-            }))
+            Some(self.key.clone())
         }
     }
 
@@ -96,12 +73,35 @@ mod tests {
 
         let contexts = store.find_by_sha1(hash_bytes).unwrap();
         let contexts_copy = contexts.clone();
+
+        // attempt to acquire a private key and construct CngSigningKey
+        let (context, key) = contexts
+            .into_iter()
+            .find_map(|ctx| {
+                let key = ctx.acquire_key().ok()?;
+                CngSigningKey::new(key).ok().map(|key| (ctx, key))
+            })
+            .unwrap();
+
+        println!("Key alg group: {:?}", key.key().algorithm_group());
+        println!("Key alg: {:?}", key.key().algorithm());
+
+        // attempt to acquire a full certificate chain
+        let chain = context.as_chain_der().ok().unwrap();
+        let certs = chain.into_iter().map(Into::into).collect();
+        let key_der = CertifiedKey {
+            cert: certs,
+            key: Arc::new(key),
+            ocsp: None,
+        };
+        // cannot use the with single cert API since we use a custom key provider.
         // make resolver
-        let cert_resolver = ServerCertResolver { inner: contexts };
+        let cert_resolver = ServerCertResolver {
+            key: Arc::new(key_der),
+        };
 
         let config =
             rustls::ServerConfig::builder_with_provider(Arc::new(default_symcrypt_provider()))
-                //.with_no_client_auth()
                 .with_safe_default_protocol_versions()
                 .unwrap()
                 .with_no_client_auth()
@@ -136,13 +136,6 @@ mod tests {
 
                     let fut = async move {
                         let mut stream = acceptor.accept(stream).await?;
-
-                        // if flag_echo {
-                        //     let (mut reader, mut writer) = split(stream);
-                        //     let n = copy(&mut reader, &mut writer).await?;
-                        //     writer.flush().await?;
-                        //     println!("Echo: {} - {}", peer_addr, n);
-                        // } else {
                         let mut output = sink();
                         stream
                             .write_all(
