@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rustls-cng = { git = "https://github.com/rustls/rustls-cng.git", default-features = false}
-#rustls = { git = "https://github.com/rustls/rustls.git", default-features = false, features = ["std"] } # same as cng
-rustls = {version = "0.23.7", default-features = false, features = ["std"]}
-hex = "0.4"
-tokio-rustls = { version = "0.26", default-features = false}
-tokio = { version = "1.0", features = ["full"] }
-bytes = "*"
-rustls-symcrypt = "0.1.0"
+rustls-cng.workspace = true
+rustls.workspace = true
+hex.workspace = true
+tokio-rustls.workspace = true
+tokio.workspace = true
+bytes.workspace = true
+rustls-symcrypt.workspace = true
+uds_windows.workspace = true
