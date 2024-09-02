@@ -4,11 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rustls-cng.workspace = true
 rustls.workspace = true
-hex.workspace = true
 tokio-rustls.workspace = true
 tokio.workspace = true
 bytes.workspace = true
 rustls-symcrypt.workspace = true
 uds_windows.workspace = true
+proxy.workspace = true

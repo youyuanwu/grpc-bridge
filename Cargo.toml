@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [
+members = [ "crates/libs/proxy",
   "crates/samples/*"
 ]
 
@@ -13,6 +13,13 @@ tokio = { version = "1.0", features = ["full"] }
 bytes = "*"
 rustls-symcrypt = "0.1.0"
 uds_windows = "*"
+hyper = {version = "1", features= ["client"]}
+hyper-util = { version = "*",  default-features = false, features = ["server-auto", "tokio", "client-legacy"] }
+http-body-util = "*"
+tower = "*"
+hyperlocal-with-windows = "*"
+# libs in this repo
+proxy = {path = "./crates/libs/proxy"}
 
 [patch.crates-io]
 # cng uses this dep without version so we use it same for it to compile

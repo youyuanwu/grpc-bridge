@@ -1,0 +1,19 @@
+[package]
+name = "proxy"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustls-cng.workspace = true
+rustls.workspace = true
+rustls-symcrypt.workspace = true
+hex.workspace = true
+tokio.workspace = true
+tokio-rustls.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+# uds_windows.workspace = true
+http-body-util.workspace = true
+tower.workspace = true
+hyperlocal-with-windows.workspace = true
+uds_windows.workspace = true
