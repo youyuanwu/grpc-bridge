@@ -8,10 +8,14 @@ jobs:
     timeout-minutes: 60 # vcpkg might take time from cold cache
     strategy:
       matrix:
-        BUILD_TYPE: ["Debug", "Release"]
+        BUILD_TYPE: ["Debug"] # "Release"
         os: [ windows-latest, ubuntu-latest ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
+    - name: set env symcrypt
+      shell: pwsh
+      run: echo "SYMCRYPT_LIB_PATH=${PWD}/build/_deps/symcrypt_release-src/dll" >> $env:GITHUB_ENV
 
     - name: setup dotnet
       uses: actions/setup-dotnet@v4
@@ -24,6 +28,12 @@ jobs:
 
     - name: Get specific version CMake
       uses: lukka/get-cmake@v3.25.1
+
+    - name: Install rust stable
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: 1.79.0
+        components: rustfmt, clippy
 
     # - name: Setup vcpkg (it does not install any package yet)
     #   uses: lukka/run-vcpkg@v11
@@ -52,3 +62,15 @@ jobs:
         Platform: "" # for dotnet build var not mix with cpp
     # - name: run test
     #   run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
+
+    - name: Run cargo check
+      run: cargo check
+
+    - name: Run cargo fmt
+      run: cargo fmt --all -- --check
+    
+    - name: Run cargo clippy
+      run: cargo clippy -- -D warnings
+
+    - name: run all rust unittests
+      run: cargo test --all

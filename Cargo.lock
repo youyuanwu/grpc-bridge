@@ -720,6 +720,7 @@ dependencies = [
 name = "proxy"
 version = "0.1.0"
 dependencies = [
+ "cfg-if",
  "hex",
  "http-body-util",
  "hyper",
@@ -730,7 +731,9 @@ dependencies = [
  "rustls-symcrypt",
  "tokio",
  "tokio-rustls",
+ "tokio-util",
  "tower",
+ "trait-variant",
  "uds_windows",
 ]
 
@@ -827,7 +830,7 @@ dependencies = [
 [[package]]
 name = "rustls"
 version = "0.23.12"
-source = "git+https://github.com/rustls/rustls.git#213f39fb573865550fdef1726886e63fe73fb6ed"
+source = "git+https://github.com/rustls/rustls.git#46555f117eeedd8e1a115595c2915ed0a99ada44"
 dependencies = [
  "once_cell",
  "ring",
@@ -1211,6 +1214,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
+]
+
+[[package]]
+name = "trait-variant"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70977707304198400eb4835a78f6a9f928bf41bba420deb8fdb175cd965d77a7"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

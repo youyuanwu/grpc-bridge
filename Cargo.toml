@@ -18,6 +18,9 @@ hyper-util = { version = "*",  default-features = false, features = ["server-aut
 http-body-util = "*"
 tower = "*"
 hyperlocal-with-windows = "*"
+tokio-util = "*"
+cfg-if = "1.0"
+trait-variant = "0.1"
 # libs in this repo
 proxy = {path = "./crates/libs/proxy"}
 

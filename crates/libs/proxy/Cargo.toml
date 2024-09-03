@@ -17,3 +17,6 @@ http-body-util.workspace = true
 tower.workspace = true
 hyperlocal-with-windows.workspace = true
 uds_windows.workspace = true
+tokio-util.workspace = true
+cfg-if.workspace = true
+trait-variant.workspace = true

@@ -1,4 +1,4 @@
-use std::{process::Command, sync::Arc};
+use std::{path::PathBuf, process::Command, sync::Arc};
 
 use rustls::{
     server::{ClientHello, ResolvesServerCert},
@@ -35,7 +35,10 @@ pub struct ServerCertResolver {
 
 impl ResolvesServerCert for ServerCertResolver {
     fn resolve(&self, client_hello: ClientHello) -> Option<Arc<CertifiedKey>> {
-        println!("Client hello server name: {:?}", client_hello.server_name());
+        println!(
+            "Tls Client hello server name: {:?}",
+            client_hello.server_name()
+        );
         Some(self.key.clone())
     }
 }
@@ -98,4 +101,10 @@ fn get_cert_hash_bytes(hash: String) -> [u8; 20] {
     let mut hash_array: [u8; 20] = [0; 20];
     hex::decode_to_slice(hash.as_bytes(), &mut hash_array).expect("Decoding failed");
     hash_array
+}
+
+pub fn get_test_socket_path() -> PathBuf {
+    let sock = "my.sock";
+    std::env::temp_dir().join(sock)
+    // let conn = crate::conn::UdsConnector::new(path);
 }

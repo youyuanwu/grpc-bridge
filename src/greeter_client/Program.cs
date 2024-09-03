@@ -20,3 +20,4 @@ var response = await client.SayHelloAsync(
     new HelloRequest { Name = "World" });
 
 Console.WriteLine(response.Message);
+channel.Dispose();
