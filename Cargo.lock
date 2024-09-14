@@ -719,6 +719,7 @@ dependencies = [
 [[package]]
 name = "proxy"
 version = "0.1.0"
+source = "git+https://github.com/youyuanwu/yarrp.git?rev=530900da556592441b3b828f1cc9dfbde1ddacc1#530900da556592441b3b828f1cc9dfbde1ddacc1"
 dependencies = [
  "cfg-if",
  "hex",
