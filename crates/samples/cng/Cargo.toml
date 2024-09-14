@@ -11,3 +11,4 @@ bytes.workspace = true
 rustls-symcrypt.workspace = true
 uds_windows.workspace = true
 proxy.workspace = true
+tokio-util.workspace = true

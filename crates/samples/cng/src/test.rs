@@ -118,3 +118,71 @@ fn basic() {
     sht_tx.send(()).unwrap();
     th.join().unwrap();
 }
+
+#[cfg(test)]
+mod proxy_test {
+
+    use tokio_util::sync::CancellationToken;
+
+    use proxy::serve_proxy;
+
+    #[tokio::test]
+    async fn e2e_test() {
+        // open cpp server
+        let curr_dir = std::env::current_dir().unwrap();
+        println!("{:?}", curr_dir);
+        let root_dir = curr_dir
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap();
+        let server_exe = root_dir.join("build/examples/helloworld/Debug/greeter_server.exe");
+        println!("launching {:?}", server_exe);
+        let mut child_server = std::process::Command::new(server_exe.as_path())
+            .spawn()
+            .expect("Couldn't run server");
+
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+        let token = CancellationToken::new();
+        let token_cp = token.clone();
+        // open proxy
+        let proxy_child = tokio::spawn(async {
+            let addr = "127.0.0.1:5047";
+            println!("start proxy at {addr}");
+            serve_proxy(addr.parse().unwrap(), token_cp).await.unwrap();
+        });
+
+        // proxy server might be slow to come up.
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+        // send csharp request to server
+        println!("launching csharp client");
+        let mut child_client = std::process::Command::new("dotnet.exe")
+            .current_dir(root_dir)
+            .args([
+                "run",
+                "--project",
+                "./src/greeter_client/greeter_client.csproj",
+            ])
+            .spawn()
+            .expect("Couldn't run client");
+
+        tokio::task::spawn_blocking(move || {
+            child_client.wait().expect("client failed");
+        })
+        .await
+        .unwrap();
+
+        // stop proxy
+        token.cancel();
+        proxy_child.await.unwrap();
+
+        // stop cpp server
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        child_server.kill().expect("!kill");
+        child_server.wait().unwrap();
+    }
+}
