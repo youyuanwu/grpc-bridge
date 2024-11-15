@@ -2,20 +2,19 @@ cmake_minimum_required(VERSION 3.20)
 
 # TODO: use vcpkg when grpc 1.63 releases
 # configure vcpkg
-# we use CmakePresets.json to point to vcpkg
-# if ("$ENV{VCPKG_ROOT}" STREQUAL "")
-# message(FATAL_ERROR "VCPKG_ROOT not found")
-# endif()
-
+if ("$ENV{VCPKG_ROOT}" STREQUAL "")
+message(FATAL_ERROR "VCPKG_ROOT not found")
+endif()
+set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 project(grpc-bridge VERSION 0.0.1 LANGUAGES CXX)
 
-# message(STATUS "vcpkg installed dir: ${VCPKG_INSTALLED_DIR}")
+message(STATUS "vcpkg installed dir: ${VCPKG_INSTALLED_DIR}")
 
 set(CMAKE_CXX_STANDARD 17)
 
-option(USE_LOCAL_GRPC   "Use local grpc source" ON)
+option(USE_LOCAL_GRPC   "Use local grpc source" OFF)
 option(USE_FETCH_CONTENT_GRPC   "Fetch grpc from github" ON)
-set(USE_LOCAL_GRPC ON) # use latest local grpc
+# set(USE_LOCAL_GRPC ON) # use latest local grpc
 if(USE_LOCAL_GRPC)
   set(gRPC_INSTALL_default OFF)
   set(protobuf_INSTALL OFF)
@@ -44,10 +43,10 @@ if(USE_LOCAL_GRPC)
   add_library(gRPC::grpc++ ALIAS grpc++)
   add_library(gRPC::grpc++_reflection ALIAS grpc++_reflection)
 else()
-  message(FATAL_ERROR "vcpkg is not supported temporarily")
+  message(STATUS "using vcpkg")
   # use vcpkg
-  # find_package(Protobuf REQUIRED)
-  # find_package(gRPC CONFIG REQUIRED)
+  find_package(Protobuf REQUIRED)
+  find_package(gRPC CONFIG REQUIRED)
 endif()
 
 # Cmake find modules

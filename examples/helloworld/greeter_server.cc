@@ -32,6 +32,7 @@
  */
 #include <memory>
 #include <string>
+#include <filesystem>
 
 #include <grpc++/grpc++.h>
 

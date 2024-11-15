@@ -35,10 +35,10 @@ jobs:
         toolchain: 1.79.0
         components: rustfmt, clippy
 
-    # - name: Setup vcpkg (it does not install any package yet)
-    #   uses: lukka/run-vcpkg@v11
-    #   with:
-    #     vcpkgGitCommitId: 486a4640db740f5994e492eb60748111dfc48de7
+    - name: Setup vcpkg (it does not install any package yet)
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 9b5cb8e554487f3edb5d50b80188883846f81e14
 
     # - name: Run CMake consuming CMakePreset.json and run vcpkg to build dependencies
     #   uses: lukka/run-cmake@v10
