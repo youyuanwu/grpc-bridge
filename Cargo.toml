@@ -22,7 +22,7 @@ tokio-util = "*"
 cfg-if = "1.0"
 trait-variant = "0.1"
 # libs in this repo
-proxy = { git = "https://github.com/youyuanwu/yarrp.git", rev = "530900da556592441b3b828f1cc9dfbde1ddacc1" }
+proxy = { git = "https://github.com/youyuanwu/yarrp.git", rev = "9aa6dded6f4c5a6ceae2204b63d8a15afc966c47" }
 
 [patch.crates-io]
 # cng uses this dep without version so we use it same for it to compile

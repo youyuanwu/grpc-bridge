@@ -122,9 +122,32 @@ fn basic() {
 #[cfg(test)]
 mod proxy_test {
 
+    use std::path::Path;
+
     use tokio_util::sync::CancellationToken;
 
     use proxy::serve_proxy;
+
+    async fn invoke_csharp_client(root_dir: &Path) {
+        // send csharp request to server
+        println!("launching csharp client");
+        let mut child_client = std::process::Command::new("dotnet.exe")
+            .current_dir(root_dir)
+            .args([
+                "run",
+                "--project",
+                "./src/greeter_client/greeter_client.csproj",
+            ])
+            .spawn()
+            .expect("Couldn't run client");
+
+        tokio::task::spawn_blocking(move || {
+            // call it twice
+            child_client.wait().expect("client failed");
+        })
+        .await
+        .unwrap();
+    }
 
     #[tokio::test]
     async fn e2e_test() {
@@ -158,23 +181,9 @@ mod proxy_test {
         // proxy server might be slow to come up.
         tokio::time::sleep(std::time::Duration::from_secs(5)).await;
 
-        // send csharp request to server
-        println!("launching csharp client");
-        let mut child_client = std::process::Command::new("dotnet.exe")
-            .current_dir(root_dir)
-            .args([
-                "run",
-                "--project",
-                "./src/greeter_client/greeter_client.csproj",
-            ])
-            .spawn()
-            .expect("Couldn't run client");
-
-        tokio::task::spawn_blocking(move || {
-            child_client.wait().expect("client failed");
-        })
-        .await
-        .unwrap();
+        // call it twice
+        invoke_csharp_client(root_dir).await;
+        invoke_csharp_client(root_dir).await;
 
         // stop proxy
         token.cancel();
