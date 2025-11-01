@@ -12,7 +12,7 @@ use tokio_rustls::{TlsAcceptor, TlsConnector};
 
 #[test]
 fn basic() {
-    let (config, contexts_copy) = proxy::test_util::load_test_server_config();
+    let (config, contexts_copy) = yarrp_rustls::test_util::load_test_server_config();
     // run tokio server
     let acceptor = TlsAcceptor::from(Arc::new(config));
 
@@ -39,7 +39,7 @@ fn basic() {
                 .unwrap();
 
                 let acceptor = acceptor.clone();
-
+                println!("tcp accepted from {}", peer_addr);
                 let fut = async move {
                     let mut stream = acceptor.accept(stream).await?;
                     let mut output = sink();
@@ -55,14 +55,12 @@ fn basic() {
                     stream.shutdown().await?;
                     copy(&mut stream, &mut output).await?;
                     println!("Hello: {}", peer_addr);
-                    //}
-
                     Ok(()) as io::Result<()>
                 };
 
                 tokio::spawn(async move {
                     if let Err(err) = fut.await {
-                        eprintln!("{:?}", err);
+                        eprintln!("server tls stream error {}", err);
                     }
                 });
             }
@@ -83,17 +81,14 @@ fn basic() {
         root_store
             .add(contexts_copy.first().unwrap().as_der().into())
             .unwrap();
+        let client_cert =
+            yarrp_rustls::cng::ClientCertResolver::try_from_certs(contexts_copy).unwrap();
         let client_config =
             ClientConfig::builder_with_provider(Arc::new(default_symcrypt_provider()))
                 .with_safe_default_protocol_versions()
                 .unwrap()
                 .with_root_certificates(root_store)
-                .with_no_client_auth();
-        // .with_root_certificates(root_store)
-        // .with_client_cert_resolver(Arc::new(ClientCertResolver(
-        //     store,
-        //     params.client_cert.clone(),
-        // )));
+                .with_client_cert_resolver(Arc::new(client_cert));
         let addr = "127.0.0.1:2345";
         let connector = TlsConnector::from(Arc::new(client_config));
         let stream = TcpStream::connect(&addr).await.unwrap();
@@ -126,7 +121,7 @@ mod proxy_test {
 
     use tokio_util::sync::CancellationToken;
 
-    use proxy::serve_proxy;
+    use crate::util::serve_proxy;
 
     async fn invoke_csharp_client(root_dir: &Path) {
         // send csharp request to server

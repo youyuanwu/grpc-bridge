@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+tokio.workspace = true
+
+[target.'cfg(windows)'.dependencies]
 rustls.workspace = true
 tokio-rustls.workspace = true
-tokio.workspace = true
 bytes.workspace = true
 rustls-symcrypt.workspace = true
-uds_windows.workspace = true
-proxy.workspace = true
+yarrp.workspace = true
+yarrp-rustls.workspace = true
 tokio-util.workspace = true

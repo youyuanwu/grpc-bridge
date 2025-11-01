@@ -50,6 +50,9 @@ target_link_libraries(kvs_grpc_proto
   PUBLIC
   gRPC::grpc++_reflection
   protobuf::libprotobuf
+  absl::check
+  absl::flags_parse
+  absl::log_initialize
 )
 
 # client
@@ -57,7 +60,8 @@ add_executable(client "client.cc" "caching_interceptor.h")
 target_link_libraries(client
   kvs_grpc_proto
   gRPC::grpc++_reflection
-  protobuf::libprotobuf)
+  protobuf::libprotobuf
+)
 
 # server
 add_executable(server "server.cc")

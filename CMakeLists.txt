@@ -65,7 +65,7 @@ add_custom_target(build_dotnet ALL
 )
 
 # download symcrypt
-set(release_url https://github.com/microsoft/SymCrypt/releases/download/v103.4.2/symcrypt-windows-amd64-release-103.4.2-171f697.zip)
+set(release_url https://github.com/microsoft/SymCrypt/releases/download/v103.8.0/symcrypt-windows-amd64-release-103.8.0-53be637d.zip)
 
 message(STATUS "fetching symcrypt_release " ${release_url})
 include(FetchContent)
@@ -89,17 +89,17 @@ file(
 # generate test cert
 if(WIN32)
 # get the test certificate
-execute_process(COMMAND pwsh.exe -Command "Get-ChildItem Cert:\\CurrentUser\\My | Where-Object -Property FriendlyName -EQ -Value MsQuic-Test | Select-Object -ExpandProperty Thumbprint -First 1"
+execute_process(COMMAND pwsh.exe -Command "Get-ChildItem Cert:\\CurrentUser\\My | Where-Object -Property FriendlyName -EQ -Value YARRP-Test | Select-Object -ExpandProperty Thumbprint -First 1"
   OUTPUT_VARIABLE TEST_CERT_HASH
 )
 
 if(TEST_CERT_HASH STREQUAL "")
   message(Status "Generating TEST_CERT_HASH")
   execute_process(
-    COMMAND pwsh.exe -Command "New-SelfSignedCertificate -DnsName $env:computername,localhost -FriendlyName MsQuic-Test -KeyUsageProperty Sign -KeyUsage DigitalSignature -CertStoreLocation cert:\\CurrentUser\\My -HashAlgorithm SHA256 -Provider \"Microsoft Software Key Storage Provider\" -KeyExportPolicy Exportable"
+    COMMAND pwsh.exe -Command "New-SelfSignedCertificate -DnsName $env:computername,localhost -FriendlyName YARRP-Test -KeyUsageProperty Sign -KeyUsage DigitalSignature -CertStoreLocation cert:\\CurrentUser\\My -HashAlgorithm SHA256 -Provider \"Microsoft Software Key Storage Provider\" -KeyExportPolicy Exportable"
     COMMAND_ERROR_IS_FATAL ANY
   )
-  execute_process(COMMAND pwsh.exe -Command "Get-ChildItem Cert:\\CurrentUser\\My | Where-Object -Property FriendlyName -EQ -Value MsQuic-Test | Select-Object -ExpandProperty Thumbprint -First 1"
+  execute_process(COMMAND pwsh.exe -Command "Get-ChildItem Cert:\\CurrentUser\\My | Where-Object -Property FriendlyName -EQ -Value YARRP-Test | Select-Object -ExpandProperty Thumbprint -First 1"
     OUTPUT_VARIABLE TEST_CERT_HASH
     COMMAND_ERROR_IS_FATAL ANY
   )
