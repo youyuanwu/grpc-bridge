@@ -32,11 +32,24 @@ public class ClientLoggingInterceptor : Interceptor
             if (task.IsCompletedSuccessfully)
             {
                 _logger.LogInformation("Client received response: {ResponseType}", typeof(TResponse).Name);
+                return task.Result;
             }
             else if (task.IsFaulted)
             {
                 _logger.LogError(task.Exception, "Client request failed: {RequestType}", typeof(TRequest).Name);
+
+                // Properly propagate the original exception
+                // task.Exception is an AggregateException, get the inner exception
+                var innerException = task.Exception?.GetBaseException() ?? task.Exception;
+                throw innerException!;
             }
+            else if (task.IsCanceled)
+            {
+                _logger.LogWarning("Client request was canceled: {RequestType}", typeof(TRequest).Name);
+                throw new TaskCanceledException("The gRPC call was canceled");
+            }
+
+            // This should never be reached, but just in case
             return task.Result;
         });
 

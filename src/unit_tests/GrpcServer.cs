@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace unit_tests;
 
 public class GrpcServer
 {
 
-    public static (Task ShutdownTask, Task<Uri> UriTask) Run(CancellationToken cancellationToken)
+    public static (Task ShutdownTask, Task<Uri> UriTask) Run(CancellationToken cancellationToken, int instanceId)
     {
         var builder = WebApplication.CreateBuilder();
 
@@ -26,6 +26,14 @@ public class GrpcServer
 
         // Add services to the container.
         builder.Services.AddGrpc();
+
+        // Add authentication and authorization
+        builder.Services.AddHeaderAuthentication(HeaderAuthConstants.TokenDirectPrefix);
+        builder.Services.AddAuthorization();
+
+        // Add GreeterMessagePrefix singleton
+        builder.Services.AddSingleton(new GreeterMessagePrefix($"Hello{instanceId}"));
+
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders();
@@ -35,7 +43,13 @@ public class GrpcServer
 
         var app = builder.Build();
 
-        app.MapGrpcService<GreeterServerHello1>();
+        app.UseRouting();
+
+        // Add authentication and authorization middleware - MUST be between UseRouting() and endpoint mapping
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapGrpcService<GreeterServer>();
 
         // Register for cancellation and run the application
         cancellationToken.Register(app.Lifetime.StopApplication);
@@ -61,15 +75,21 @@ public class GrpcServer
     }
 }
 
-public class GreeterServerHello1(ILoggerFactory loggerFactory) : Greeter.GreeterBase
+public class GreeterMessagePrefix(string prefix)
 {
-    public static readonly string ServiceName = nameof(GreeterServerHello1);
+    public readonly string Prefix = prefix;
+}
 
-    private readonly ILogger<GreeterServerHello1> _logger = loggerFactory.CreateLogger<GreeterServerHello1>();
+[Authorize]
+public class GreeterServer(ILoggerFactory loggerFactory, GreeterMessagePrefix messagePrefix) : Greeter.GreeterBase
+{
+    public readonly string ServiceName = messagePrefix.Prefix;
+
+    private readonly ILogger<GreeterServer> _logger = loggerFactory.CreateLogger<GreeterServer>();
 
     public override Task<HelloReply> SayHello(HelloRequest request, Grpc.Core.ServerCallContext context)
     {
-        _logger.LogInformation("Received request from {Name}", request.Name);
+        _logger.LogInformation("{ServiceName} Received request from {Name}", ServiceName, request.Name);
         return Task.FromResult(new HelloReply
         {
             Message = ServiceName + " " + request.Name
@@ -77,19 +97,3 @@ public class GreeterServerHello1(ILoggerFactory loggerFactory) : Greeter.Greeter
     }
 }
 
-
-public class GreeterServerInProxy(ILoggerFactory loggerFactory) : Greeter.GreeterBase
-{
-    public static readonly string ServiceName = nameof(GreeterServerInProxy);
-
-    private readonly ILogger<GreeterServerInProxy> _logger = loggerFactory.CreateLogger<GreeterServerInProxy>();
-
-    public override Task<HelloReply> SayHello(HelloRequest request, Grpc.Core.ServerCallContext context)
-    {
-        _logger.LogInformation("Received request from {Name}", request.Name);
-        return Task.FromResult(new HelloReply
-        {
-            Message = ServiceName + " " + request.Name
-        });
-    }
-}

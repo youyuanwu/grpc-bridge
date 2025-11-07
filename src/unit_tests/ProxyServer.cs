@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using Grpc.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,9 +15,14 @@ using Yarp.ReverseProxy.Transforms;
 
 namespace unit_tests;
 
+public static class GrpcProxyConstants
+{
+    public const string TargetInstanceIdHeader = "X-Target-InstanceId";
+}
+
 public class ProxyServer
 {
-    public static (Task ShutdownTask, Task<Uri> UriTask) RunAsync(Uri targetUri, string proxyPrefix, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+    public static (Task ShutdownTask, Task<Uri> UriTask) RunAsync(Dictionary<int, Uri> addrMap, string proxyPrefix, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
     {
         var logger = loggerFactory.CreateLogger<ProxyServer>();
 
@@ -25,6 +31,7 @@ public class ProxyServer
         // Clear the default logging providers and add the provided logger factory
         builder.Logging.ClearProviders();
         builder.Services.AddSingleton<ILoggerFactory>(loggerFactory);
+        builder.Services.AddSingleton(new GreeterMessagePrefix("Proxy"));
 
         // Configure to use port 0 to get an available port and enable HTTP/2 cleartext (H2C)
         builder.Services.Configure<KestrelServerOptions>(options =>
@@ -47,6 +54,10 @@ public class ProxyServer
         builder.Services.AddGrpc();
         builder.Services.AddHttpForwarder();
 
+        // Add authentication and authorization
+        builder.Services.AddHeaderAuthentication(HeaderAuthConstants.TokenProxyPrefix);
+        builder.Services.AddAuthorization();
+
         var app = builder.Build();
 
         // Use HTTP logging only for non-gRPC endpoints
@@ -54,7 +65,7 @@ public class ProxyServer
             appBuilder => appBuilder.UseHttpLogging());
 
         // Proxy itself runs a grpc server.
-        app.MapGrpcService<GreeterServerInProxy>();
+        app.MapGrpcService<GreeterServer>();
 
         // Configure our own HttpMessageInvoker for outbound calls for proxy operations
         var httpClient = new HttpMessageInvoker(new SocketsHttpHandler
@@ -79,6 +90,10 @@ public class ProxyServer
 
         app.UseRouting();
 
+        // Add authentication and authorization middleware - MUST be between UseRouting() and endpoint mapping
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         // Add a catch-all middleware to debug routing
         app.Use(async (context, next) =>
         {
@@ -89,6 +104,24 @@ public class ProxyServer
         // For an alternate example that includes those features see BasicYarpSample.
         app.MapPost(proxyPrefix + "/{**catch-all}", async (HttpContext httpContext, IHttpForwarder forwarder, ILogger<ProxyServer> injectedLogger) =>
         {
+            // Determine the target URI based on the header
+            if (!httpContext.Request.Headers.TryGetValue(GrpcProxyConstants.TargetInstanceIdHeader, out var instanceIdValues))
+            {
+                injectedLogger.LogWarning("Missing {Header} header", GrpcProxyConstants.TargetInstanceIdHeader);
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await httpContext.Response.WriteAsync($"Missing {GrpcProxyConstants.TargetInstanceIdHeader} header");
+                return;
+            }
+
+            var instanceId = int.Parse(instanceIdValues.FirstOrDefault() ?? "-1");
+            if (!addrMap.TryGetValue(instanceId, out var targetUri))
+            {
+                injectedLogger.LogWarning("Unknown {Header} value: {InstanceId}", GrpcProxyConstants.TargetInstanceIdHeader, instanceId);
+                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                await httpContext.Response.WriteAsync($"Unknown {GrpcProxyConstants.TargetInstanceIdHeader} value: {instanceId}");
+                return;
+            }
+
             var error = await forwarder.SendAsync(httpContext, targetUri.ToString(),
                 httpClient, requestConfig, transformer);
             // Check if the operation was successful
@@ -99,7 +132,7 @@ public class ProxyServer
                 injectedLogger.LogError("Injected logger: Forward failed: {exception}", exception);
             }
 
-        });
+        }).RequireAuthorization();
 
         // Add a fallback route for debugging
         app.MapFallback(async (HttpContext httpContext, ILogger<ProxyServer> injectedLogger) =>
@@ -169,6 +202,12 @@ internal class CustomTransformer(string proxyPrefix, ILoggerFactory loggerFactor
         // queryContext.Collection.Remove("param1");
         // queryContext.Collection["area"] = "xx2";
 
+        // Remove the authentication header to avoid forwarding it
+        proxyRequest.Headers.Remove(HeaderAuthConstants.AuthorizationHeader);
+        proxyRequest.Headers.Remove(GrpcProxyConstants.TargetInstanceIdHeader);
+        // Add the direct authentication header.
+        proxyRequest.Headers.Add(HeaderAuthConstants.AuthorizationHeader, HeaderAuthConstants.TokenDirectPrefix + "directtoken-xyz");
+
         // remove the proxy prefix from the path
         var originalPath = httpContext.Request.Path.ToString();
         if (originalPath.StartsWith(_proxyPrefix))
@@ -176,7 +215,7 @@ internal class CustomTransformer(string proxyPrefix, ILoggerFactory loggerFactor
             originalPath = originalPath.Substring(_proxyPrefix.Length);
         }
 
-        // // Assign the custom uri. Be careful about extra slashes when concatenating here. RequestUtilities.MakeDestinationAddress is a safe default.
+        // Assign the custom uri. Be careful about extra slashes when concatenating here. RequestUtilities.MakeDestinationAddress is a safe default.
         // Use the provided destinationPrefix instead of hardcoding localhost
         proxyRequest.RequestUri = RequestUtilities.MakeDestinationAddress(destinationPrefix, originalPath, queryContext.QueryString);
         _logger.LogInformation("Transformed request URI: {}", proxyRequest.RequestUri);
@@ -184,3 +223,4 @@ internal class CustomTransformer(string proxyPrefix, ILoggerFactory loggerFactor
         proxyRequest.Headers.Host = null;
     }
 }
+
