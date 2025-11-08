@@ -53,6 +53,7 @@ endif()
 #list(APPEND CMAKE_MODULE_PATH "${VCPKG_INSTALLED_DIR}/share/grpc")
 
 add_subdirectory(examples)
+add_subdirectory(flatbuffers-test/cpp)
 
 find_program(dotnet_exe
   NAMES dotnet.exe dotnet

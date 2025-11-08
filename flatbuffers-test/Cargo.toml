@@ -1,0 +1,17 @@
+[package]
+name = "flatbuffers-test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+flatbuffers.workspace = true
+flatbuffers-tonic.workspace = true
+tonic.workspace = true
+bytes.workspace = true
+tokio-stream.workspace = true
+flatbuffers-util.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+
+[build-dependencies]
+flatbuffers-tonic-build.workspace = true

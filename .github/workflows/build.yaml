@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 120 # vcpkg might take time from cold cache
+    timeout-minutes: 150 # vcpkg might take time from cold cache for 100 mins minimum.
     strategy:
       matrix:
         BUILD_TYPE: ["Debug"] # "Release"
@@ -22,6 +22,20 @@ jobs:
       with:
         dotnet-version: 
           8.0.x
+
+    # install flatc
+    - name: Install flatc windows
+      if: runner.os == 'Windows'
+      run: |
+        winget install flatbuffers --accept-package-agreements --accept-source-agreements --disable-interactivity
+        echo "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Google.FlatBuffers_Microsoft.Winget.Source_8wekyb3d8bbwe" >> $env:GITHUB_PATH
+    
+    - name: Install flatc ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        wget https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.clang++-18.zip
+        unzip Linux.flatc.binary.clang++-18.zip
+        sudo mv flatc /usr/local/bin/
 
     - name: Install rust stable
       uses: dtolnay/rust-toolchain@stable
@@ -76,6 +90,9 @@ jobs:
 
     - name: run all rust unit tests
       run: cargo test --all-targets
+
+    - name: dotnet format
+      run: dotnet format --verify-no-changes
 
     - name: run all dotnet tests
       run: dotnet test

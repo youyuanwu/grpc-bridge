@@ -2,7 +2,18 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "grpc-bridge",
   "version": "0.0.1",
+  "builtin-baseline": "e3ed41868d5034bc608eaaa58383cd6ecdbb5ffb",
   "dependencies": [
-    "grpc"
+    "grpc",
+    {
+      "name": "flatbuffers",
+      "version>=": "25.2.10"
+    }
+  ],
+  "overrides": [
+    {
+      "name": "flatbuffers",
+      "version": "25.2.10"
+    }
   ]
 }

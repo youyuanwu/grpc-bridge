@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
   "crates/samples/*"
-]
+, "flatbuffers-test"]
 
 [workspace.dependencies]
 rustls-cng = "0.6"
@@ -12,9 +12,17 @@ tokio = { version = "1", features = ["full"] }
 bytes = "1"
 rustls-symcrypt = "0.2"
 tokio-util = "0.7"
-# libs in this repo
 yarrp = { git = "https://github.com/youyuanwu/yarrp.git", rev = "a693add3a77d2e43dcbc508202eb2a26601f232b" }
 yarrp-rustls = { git = "https://github.com/youyuanwu/yarrp.git", rev = "a693add3a77d2e43dcbc508202eb2a26601f232b" }
+
+flatbuffers = { version = ">=25.2.10,<26" }
+flatbuffers-util = { version = "0.1" }
+flatbuffers-tonic-build = { version = "0.1" }
+flatbuffers-tonic = { version = "0.1" }
+tonic = { version = "0.14" }
+tonic-build = "0.14"
+tokio-stream = "0.1"
+
 [patch.crates-io]
 # cng uses this dep without version so we use it same for it to compile
 # rustls = { git = "https://github.com/rustls/rustls.git" } # same as cng
