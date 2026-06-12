@@ -92,7 +92,7 @@ jobs:
       run: > 
         cmake . -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -B build
     - name: run build
-      run: cmake --build build --config ${{ matrix.BUILD_TYPE }}
+      run: cmake --build build --config ${{ matrix.BUILD_TYPE }} --parallel
       env:
         Platform: "" # for dotnet build var not mix with cpp
 
