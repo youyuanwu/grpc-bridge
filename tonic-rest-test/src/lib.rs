@@ -47,32 +47,33 @@ mod tests {
 
     static SEM: tokio::sync::Semaphore = tokio::sync::Semaphore::const_new(1);
 
-    async fn bind() -> (tokio::net::TcpListener, std::net::SocketAddr) {
+    /// Spawn a single Axum server that serves both the gRPC routes and the
+    /// generated REST routes on the same port.
+    async fn spawn_server(
+        token: CancellationToken,
+    ) -> (std::net::SocketAddr, tokio::task::JoinHandle<()>) {
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
-        (listener, addr)
+
+        let grpc = tonic::service::Routes::new(GreeterServer::new(Greeter)).into_axum_router();
+        let rest = crate::greeter_rest_router(Arc::new(Greeter));
+        let app = rest.merge(grpc);
+
+        let handle = tokio::spawn(async move {
+            axum::serve(listener, app)
+                .with_graceful_shutdown(async move { token.cancelled().await })
+                .await
+                .unwrap();
+        });
+
+        (addr, handle)
     }
 
     #[tokio::test]
     async fn grpc_say_hello() {
         let _permit = SEM.acquire().await.unwrap();
-        let (listener, addr) = bind().await;
         let token = CancellationToken::new();
-
-        let svh = {
-            let token = token.clone();
-            tokio::spawn(async move {
-                let svc = GreeterServer::new(Greeter);
-                tonic::transport::Server::builder()
-                    .add_service(svc)
-                    .serve_with_incoming_shutdown(
-                        tonic::transport::server::TcpIncoming::from(listener),
-                        token.cancelled(),
-                    )
-                    .await
-                    .unwrap();
-            })
-        };
+        let (addr, svh) = spawn_server(token.clone()).await;
 
         let mut client = GreeterClient::connect(format!("http://{addr}"))
             .await
@@ -93,19 +94,8 @@ mod tests {
     #[tokio::test]
     async fn rest_say_hello_post() {
         let _permit = SEM.acquire().await.unwrap();
-        let (listener, addr) = bind().await;
         let token = CancellationToken::new();
-
-        let router = crate::greeter_rest_router(Arc::new(Greeter));
-        let svh = {
-            let token = token.clone();
-            tokio::spawn(async move {
-                axum::serve(listener, router)
-                    .with_graceful_shutdown(async move { token.cancelled().await })
-                    .await
-                    .unwrap();
-            })
-        };
+        let (addr, svh) = spawn_server(token.clone()).await;
 
         let resp: serde_json::Value = reqwest::Client::new()
             .post(format!("http://{addr}/v1/sayhello"))
@@ -127,19 +117,8 @@ mod tests {
     #[tokio::test]
     async fn rest_get_greeting() {
         let _permit = SEM.acquire().await.unwrap();
-        let (listener, addr) = bind().await;
         let token = CancellationToken::new();
-
-        let router = crate::greeter_rest_router(Arc::new(Greeter));
-        let svh = {
-            let token = token.clone();
-            tokio::spawn(async move {
-                axum::serve(listener, router)
-                    .with_graceful_shutdown(async move { token.cancelled().await })
-                    .await
-                    .unwrap();
-            })
-        };
+        let (addr, svh) = spawn_server(token.clone()).await;
 
         let resp: serde_json::Value = reqwest::get(format!("http://{addr}/v1/greeting/alice"))
             .await
