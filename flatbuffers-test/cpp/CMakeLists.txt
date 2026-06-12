@@ -8,6 +8,7 @@ add_custom_command(
   COMMAND flatc --grpc --cpp -o ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${_fbs_file}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_fbs_file}
 )
+add_custom_target(fbs_greeter_generate DEPENDS ${_fbs_cpp_files})
 
 find_package(flatbuffers CONFIG REQUIRED)
 
@@ -15,6 +16,7 @@ add_executable(fbs_greeter_server
   server.cpp
   ${_fbs_cpp_files}
 )
+add_dependencies(fbs_greeter_server fbs_greeter_generate)
 
 target_include_directories(
   fbs_greeter_server
@@ -29,6 +31,7 @@ add_executable(fbs_greeter_client
   client.cpp
   ${_fbs_cpp_files}
 )
+add_dependencies(fbs_greeter_client fbs_greeter_generate)
 target_include_directories(
   fbs_greeter_client
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
