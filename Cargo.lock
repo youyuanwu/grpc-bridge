@@ -227,9 +227,9 @@ dependencies = [
 
 [[package]]
 name = "flatbuffers-build"
-version = "0.2.3+flatc-25.2.10"
+version = "0.2.4+flatc-25.12.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "680d77d7a4af56a252ebf4a50d9fba27e2914d4e1e8c3ae574cc4464726948fb"
+checksum = "b2859e0a9c8f4ea7ba413bb92c799559b78215976bb74dad2f5f618fad8fce50"
 dependencies = [
  "thiserror",
 ]

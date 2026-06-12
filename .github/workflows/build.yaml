@@ -40,14 +40,14 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        Invoke-WebRequest -Uri https://github.com/google/flatbuffers/releases/download/v25.2.10/Windows.flatc.binary.zip -OutFile flatc.zip
+        Invoke-WebRequest -Uri https://github.com/google/flatbuffers/releases/download/v25.12.19/Windows.flatc.binary.zip -OutFile flatc.zip
         Expand-Archive -Path flatc.zip -DestinationPath "$env:RUNNER_TEMP\flatc"
         echo "$env:RUNNER_TEMP\flatc" >> $env:GITHUB_PATH
     
     - name: Install flatc ubuntu
       if: runner.os == 'Linux'
       run: |
-        wget https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.clang++-18.zip
+        wget https://github.com/google/flatbuffers/releases/download/v25.12.19/Linux.flatc.binary.clang++-18.zip
         unzip Linux.flatc.binary.clang++-18.zip
         sudo mv flatc /usr/local/bin/
 
@@ -60,7 +60,7 @@ jobs:
     - name: Setup vcpkg (it does not install any package yet)
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: e3ed41868d5034bc608eaaa58383cd6ecdbb5ffb
+        vcpkgGitCommitId: f3e10653cc27d62a37a3763cd84b38bca07c6075
       env:
           VCPKG_BINARY_SOURCES: default,rw
 

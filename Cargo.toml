@@ -15,7 +15,7 @@ tokio-util = "0.7"
 yarrp = { git = "https://github.com/youyuanwu/yarrp.git", rev = "a693add3a77d2e43dcbc508202eb2a26601f232b" }
 yarrp-rustls = { git = "https://github.com/youyuanwu/yarrp.git", rev = "a693add3a77d2e43dcbc508202eb2a26601f232b" }
 
-flatbuffers = { version = "25.2.10" }
+flatbuffers = { version = "25.12.19" }
 flatbuffers-util = { version = "0.1" }
 flatbuffers-tonic-build = { version = "0.1" }
 flatbuffers-tonic = { version = "0.1" }
