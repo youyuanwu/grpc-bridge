@@ -51,6 +51,9 @@ jobs:
         unzip Linux.flatc.binary.clang++-18.zip
         sudo mv flatc /usr/local/bin/
 
+    - name: Install protoc
+      uses: taiki-e/install-action@protoc
+
     - name: Install rust stable
       uses: dtolnay/rust-toolchain@stable
       with:

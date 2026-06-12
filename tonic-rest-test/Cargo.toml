@@ -1,0 +1,23 @@
+[package]
+name = "tonic-rest-test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tonic.workspace = true
+tonic-prost.workspace = true
+prost.workspace = true
+tonic-rest.workspace = true
+axum.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[build-dependencies]
+tonic-prost-build.workspace = true
+tonic-rest-build.workspace = true
+prost-build.workspace = true
+
+[dev-dependencies]
+reqwest.workspace = true
