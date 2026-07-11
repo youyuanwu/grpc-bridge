@@ -8,7 +8,7 @@ jobs:
     outputs:
       channel: ${{ steps.read.outputs.channel }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
     - name: Read rust toolchain version
       id: read
       run: echo "channel=$(awk -F '\"' '/^channel/ {print $2}' rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
@@ -23,7 +23,7 @@ jobs:
         BUILD_TYPE: ["Debug"] # "Release"
         os: [ windows-latest, ubuntu-latest ]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
 
     - name: set env symcrypt
       shell: pwsh
@@ -33,7 +33,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 
-          8.0.x
+          10.0.x
 
     # install flatc
     - name: Install flatc windows
