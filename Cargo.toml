@@ -3,7 +3,8 @@ resolver = "2"
 members = [
   "crates/samples/*"
 , "flatbuffers-test"
-, "tonic-rest-test"]
+, "tonic-rest-test"
+, "grpc-tests"]
 
 [workspace.dependencies]
 rustls-cng = "0.6"
@@ -33,6 +34,12 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 tokio-stream = "0.1"
+
+# grpc-rust (https://github.com/grpc/grpc-rust) — preview crate, client-only
+grpc = "0.9"
+grpc-protobuf = "0.9"
+grpc-protobuf-build = "0.9"
+protobuf = "4.34.0-release"
 
 [patch.crates-io]
 # cng uses this dep without version so we use it same for it to compile
