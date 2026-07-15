@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "grpc-bridge",
   "version": "0.0.1",
-  "builtin-baseline": "f3e10653cc27d62a37a3763cd84b38bca07c6075",
+  "builtin-baseline": "52c9e08cdf8580d2d9762f547d22b96fd81e82f2",
   "dependencies": [
     "grpc",
     {
