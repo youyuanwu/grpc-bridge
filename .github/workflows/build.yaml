@@ -68,11 +68,27 @@ jobs:
       env:
           VCPKG_BINARY_SOURCES: default,rw
 
+    # Compute a cache key from vcpkg's own package ABI hashes. Each package's
+    # ABI hash folds in the triplet, package versions, dependencies AND the
+    # detected compiler hash, so the key rotates automatically when the runner
+    # image bumps its compiler (which otherwise silently invalidates the binary
+    # cache and forces a full rebuild).
+    - name: Compute vcpkg ABI hash for cache key
+      id: vcpkg-abi
+      shell: pwsh
+      run: |
+        $vcpkg = if ($IsWindows) { "$env:VCPKG_ROOT/vcpkg.exe" } else { "$env:VCPKG_ROOT/vcpkg" }
+        & $vcpkg install --dry-run --x-write-nuget-packages-config="$env:RUNNER_TEMP/vcpkg-abi.config"
+        if ($LASTEXITCODE -ne 0) { throw "vcpkg dry-run failed with exit code $LASTEXITCODE" }
+        $hash = (Get-FileHash "$env:RUNNER_TEMP/vcpkg-abi.config" -Algorithm SHA256).Hash.ToLower()
+        Write-Host "vcpkg ABI hash: $hash"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "hash=$hash"
+
     - name: Set up binary cache
       uses: actions/cache@v6
       with:
         path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-        key: ${{ runner.os }}-vcpkg-binary-cache-${{ hashFiles('vcpkg*.json') }}
+        key: ${{ runner.os }}-vcpkg-binary-cache-${{ steps.vcpkg-abi.outputs.hash }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-binary-cache-
 
