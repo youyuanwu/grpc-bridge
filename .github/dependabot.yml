@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      cargo-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: "rust-toolchain"
     directory: "/"
@@ -14,8 +18,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      nuget-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions-all:
+        patterns:
+          - "*"
