@@ -54,7 +54,7 @@ jobs:
     - name: Install protoc
       uses: taiki-e/install-action@v2
       with:
-        tool: protoc@34.0
+        tool: protoc@3.34.0
 
     - name: Install protoc-gen-rust-grpc
       shell: pwsh
