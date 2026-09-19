@@ -5,10 +5,7 @@ fn main() {
     println!("cargo:rerun-if-changed=protos/helloworld.proto");
 
     let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
-    let tools_bin = manifest_dir
-        .parent()
-        .unwrap()
-        .join(".tools/grpc-rust/bin");
+    let tools_bin = manifest_dir.parent().unwrap().join(".tools/grpc-rust/bin");
     let executable_suffix = std::env::consts::EXE_SUFFIX;
     let protoc = tools_bin.join(format!("protoc{executable_suffix}"));
     let grpc_plugin = tools_bin.join(format!("protoc-gen-rust-grpc{executable_suffix}"));
@@ -25,11 +22,7 @@ fn main() {
     prost_config.protoc_executable(&protoc);
     tonic_prost_build::configure()
         .build_client(false)
-        .compile_with_config(
-            prost_config,
-            &["protos/helloworld.proto"],
-            &["protos"],
-        )
+        .compile_with_config(prost_config, &["protos/helloworld.proto"], &["protos"])
         .unwrap();
 
     // Client-side stubs for the grpc-rust crate. grpc-protobuf-build emits
