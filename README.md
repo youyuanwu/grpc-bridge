@@ -15,6 +15,19 @@ The example has grpc cpp app listens on a unix socket, and asp.net kestrel serve
 cmake . -B build
 cmake --build build 
 ```
+
+### gRPC Rust codegen tools
+
+Install the pinned `protoc` and `protoc-gen-rust-grpc` binaries locally:
+
+```
+cmake -P cmake/install-grpc-rust-tools.cmake
+```
+
+The tools are installed in `target/grpc-rust-tools/bin` by default. Set
+`GRPC_RUST_TOOLS_DIR` with `-D` to choose another location, then add its `bin`
+directory to `PATH`.
+
 ### Run example
 ```ps1
 # start the server on unix socket
