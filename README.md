@@ -24,9 +24,8 @@ Install the pinned `protoc` and `protoc-gen-rust-grpc` binaries locally:
 cmake -P cmake/install-grpc-rust-tools.cmake
 ```
 
-The tools are installed in `target/grpc-rust-tools/bin` by default. Set
-`GRPC_RUST_TOOLS_DIR` with `-D` to choose another location, then add its `bin`
-directory to `PATH`.
+The tools are installed in `.tools/grpc-rust/bin`. The `grpc-tests` build
+script uses this fixed repository-local path, so no `PATH` changes are needed.
 
 ### Run example
 ```ps1

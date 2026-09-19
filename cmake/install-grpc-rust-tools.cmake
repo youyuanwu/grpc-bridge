@@ -5,7 +5,7 @@ set(PROTOC_GEN_RUST_GRPC_VERSION "0.9.0")
 
 if(NOT DEFINED GRPC_RUST_TOOLS_DIR)
   set(GRPC_RUST_TOOLS_DIR
-      "${CMAKE_CURRENT_LIST_DIR}/../target/grpc-rust-tools")
+      "${CMAKE_CURRENT_LIST_DIR}/../.tools/grpc-rust")
 endif()
 
 set(version_stamp "${GRPC_RUST_TOOLS_DIR}/versions.txt")

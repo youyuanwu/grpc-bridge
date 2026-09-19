@@ -52,12 +52,7 @@ jobs:
         sudo mv flatc /usr/local/bin/
 
     - name: Install gRPC Rust codegen tools
-      shell: pwsh
-      run: |
-        $installDir = Join-Path $env:RUNNER_TEMP "grpc-rust-tools"
-        cmake "-DGRPC_RUST_TOOLS_DIR=$installDir" -P cmake/install-grpc-rust-tools.cmake
-        $binDir = Join-Path $installDir "bin"
-        $binDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      run: cmake -P cmake/install-grpc-rust-tools.cmake
 
     - name: Install rust stable
       uses: dtolnay/rust-toolchain@stable

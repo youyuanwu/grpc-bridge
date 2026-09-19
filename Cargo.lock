@@ -647,6 +647,7 @@ dependencies = [
  "grpc-protobuf",
  "grpc-protobuf-build",
  "prost",
+ "prost-build",
  "protobuf",
  "tokio",
  "tonic",

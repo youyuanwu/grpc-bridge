@@ -21,6 +21,7 @@ protobuf.workspace = true
 
 [build-dependencies]
 tonic-prost-build.workspace = true
+prost-build.workspace = true
 grpc-protobuf-build.workspace = true
 
 [package.metadata.rust-analyzer]
