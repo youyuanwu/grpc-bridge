@@ -1,10 +1,3 @@
-// Crate is disabled on Windows (see lib.rs `#![cfg(not(windows))]`) and the
-// gRPC-rust build-deps are gated out for `cfg(windows)` targets in
-// Cargo.toml, so there is nothing to generate on Windows.
-#[cfg(windows)]
-fn main() {}
-
-#[cfg(not(windows))]
 fn main() {
     use std::path::PathBuf;
 

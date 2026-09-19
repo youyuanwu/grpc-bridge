@@ -52,7 +52,35 @@ jobs:
         sudo mv flatc /usr/local/bin/
 
     - name: Install protoc
-      uses: taiki-e/install-action@protoc
+      uses: taiki-e/install-action@v2
+      with:
+        tool: protoc@34.0
+
+    - name: Install protoc-gen-rust-grpc
+      shell: pwsh
+      run: |
+        $version = "0.9.0"
+        if ($IsWindows) {
+          $platform = "win64"
+          $checksum = "734e2ea947b32a85becdbf6c27b1353d5a499bb69fbf287446fb8c969fa6e679"
+        } elseif ($IsLinux) {
+          $platform = "linux-x86_64"
+          $checksum = "c0e93891f39f8188c23d2026af972f07547066fb3c2973f26148f9b4d52c5320"
+        } else {
+          throw "Unsupported runner OS: $env:RUNNER_OS"
+        }
+        $archive = Join-Path $env:RUNNER_TEMP "protoc-gen-rust-grpc.zip"
+        $installDir = Join-Path $env:RUNNER_TEMP "protoc-gen-rust-grpc"
+        $url = "https://github.com/grpc/grpc-rust/releases/download/protoc-gen-rust-grpc-v$version/protoc-gen-rust-grpc-$version-$platform.zip"
+        Invoke-WebRequest -Uri $url -OutFile $archive
+        if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLower() -ne $checksum) {
+          throw "protoc-gen-rust-grpc archive checksum mismatch"
+        }
+        Expand-Archive -Path $archive -DestinationPath $installDir -Force
+        if (-not $IsWindows) {
+          chmod +x (Join-Path $installDir "protoc-gen-rust-grpc")
+        }
+        $installDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Install rust stable
       uses: dtolnay/rust-toolchain@stable
