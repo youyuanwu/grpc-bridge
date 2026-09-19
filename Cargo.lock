@@ -635,7 +635,6 @@ dependencies = [
  "cmake",
  "prettyplease",
  "protobuf-codegen",
- "protoc-gen-rust-grpc",
  "syn 2.0.117",
  "which",
 ]
@@ -648,6 +647,7 @@ dependencies = [
  "grpc-protobuf",
  "grpc-protobuf-build",
  "prost",
+ "prost-build",
  "protobuf",
  "tokio",
  "tonic",
@@ -1436,15 +1436,6 @@ checksum = "a34d7ed4204a16b23d96ff805772b6495294a600a804e78e89cb49e1172a6ebe"
 dependencies = [
  "quote",
  "syn 2.0.117",
-]
-
-[[package]]
-name = "protoc-gen-rust-grpc"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3169f5dd24e6eed979a19c906bac23e3fa6352f80f0ff4b17c512631cc96bbe8"
-dependencies = [
- "cmake",
 ]
 
 [[package]]

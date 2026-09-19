@@ -38,7 +38,7 @@ tokio-stream = "0.1"
 # grpc-rust (https://github.com/grpc/grpc-rust) — preview crate, client-only
 grpc = "0.9"
 grpc-protobuf = "0.9"
-grpc-protobuf-build = "0.9"
+grpc-protobuf-build = { version = "0.9", default-features = false }
 protobuf = "4.34.0-release"
 
 [patch.crates-io]

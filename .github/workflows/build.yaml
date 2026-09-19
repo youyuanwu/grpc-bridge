@@ -51,8 +51,13 @@ jobs:
         unzip Linux.flatc.binary.clang++-18.zip
         sudo mv flatc /usr/local/bin/
 
-    - name: Install protoc
-      uses: taiki-e/install-action@protoc
+    - name: Install gRPC Rust codegen tools
+      shell: pwsh
+      run: |
+        cmake -P cmake/install-grpc-rust-tools.cmake
+        $suffix = if ($IsWindows) { ".exe" } else { "" }
+        $protoc = Join-Path $env:GITHUB_WORKSPACE ".tools/grpc-rust/bin/protoc$suffix"
+        "PROTOC=$protoc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Install rust stable
       uses: dtolnay/rust-toolchain@stable
